@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Products from './components/Products';
 import Login from './components/Login';
 import Register from './components/Register'; 
-import './App.css';
+import './styles/App.css';
 
 function App() {
   return (

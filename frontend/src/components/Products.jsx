@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../redux/actions/productActions';
-import './Products.css';
+import '../styles/Products.css';
 
 const Products = () => {
   const dispatch = useDispatch();
