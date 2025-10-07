@@ -1,50 +1,45 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../actions/productActions';
 
 const initialState = {
   items: [],
-  loading: false,
-  error: null,
   totalPages: 1,
   currentPage: 1,
+  loading: false,
+  error: null,
 };
 
 const productSlice = createSlice({
   name: 'products',
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      // Fetch Products
-      .addCase(fetchProducts.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload.products;
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = parseInt(action.payload.currentPage);
-      })
-      .addCase(fetchProducts.rejected, (state, action) => {
+  reducers: {
+    setProductLoading: (state, action) => {
+      state.loading = action.payload;
+    },
+    setProductError: (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
-      // Add Product
-      .addCase(addProduct.fulfilled, (state, action) => {
-        state.items.push(action.payload); // Add the new product to the list
-      })
-      // Update Product
-      .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.items.findIndex((p) => p._id === action.payload._id);
-        if (index !== -1) {
-          state.items[index] = action.payload; // Update the product in the list
-        }
-      })
-      // Delete Product
-      .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.items = state.items.filter((p) => p._id !== action.payload); // Remove the product
-      });
+    },
+    setProducts: (state, action) => {
+      state.items = action.payload.products;
+      state.totalPages = action.payload.totalPages;
+      state.currentPage = parseInt(action.payload.currentPage);
+      state.loading = false;
+      state.error = null;
+    },
+    addProductSuccess: (state, action) => {
+      state.items.push(action.payload);
+    },
+    updateProductSuccess: (state, action) => {
+      const index = state.items.findIndex((p) => p._id === action.payload._id);
+      if (index !== -1) {
+        state.items[index] = action.payload;
+      }
+    },
+    deleteProductSuccess: (state, action) => {
+      state.items = state.items.filter((p) => p._id !== action.payload.id);
+    },
   },
 });
 
+export const { setProductLoading, setProductError, setProducts, addProductSuccess, updateProductSuccess, deleteProductSuccess } = productSlice.actions;
 export default productSlice.reducer;

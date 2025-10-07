@@ -1,35 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../redux/actions/productActions';
-import './Products.css'; // Add some basic styling
+import './Products.css';
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { items, loading, totalPages, currentPage } = useSelector((state) => state.products);
+  const { items: products, totalPages, currentPage, loading } = useSelector((state) => state.products);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
-  // State for the form and editing logic
   const [isEditing, setIsEditing] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', price: '' });
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    dispatch(fetchProducts({ page: currentPage, search }));
-  }, [dispatch, currentPage, search]);
+    fetchProducts({ page, search }, dispatch);
+  }, [dispatch, page, search]);
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (isEditing) {
-      dispatch(updateProduct({ id: currentProduct._id, productData: formData }));
+      updateProduct(currentProduct._id, formData, dispatch);
     } else {
-      dispatch(addProduct(formData));
+      addProduct(formData, dispatch);
     }
     resetForm();
+  };
+  
+  const handleDeleteClick = (id) => {
+    if (window.confirm('Are you sure?')) {
+      deleteProduct(id, dispatch);
+    }
   };
 
   const handleEditClick = (product) => {
@@ -38,27 +42,17 @@ const Products = () => {
     setFormData({ name: product.name, description: product.description, price: product.price });
   };
 
-  const handleDeleteClick = (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      dispatch(deleteProduct(id));
-    }
-  };
-
   const resetForm = () => {
     setIsEditing(false);
     setCurrentProduct(null);
     setFormData({ name: '', description: '', price: '' });
   };
 
-  const handlePageChange = (newPage) => {
-    dispatch(fetchProducts({ page: newPage, search }));
-  };
-
   return (
     <div className="products-container">
       {isAuthenticated && (
         <div className="product-form-container">
-          <h2>{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
+          <h2>{isEditing ? 'Edit Product' : 'Add Product'}</h2>
           <form onSubmit={handleFormSubmit}>
             <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Name" required />
             <input name="description" value={formData.description} onChange={handleInputChange} placeholder="Description" required />
@@ -74,7 +68,7 @@ const Products = () => {
         <input type="text" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} />
         {loading ? <p>Loading...</p> : (
           <ul className="product-list">
-            {items.map((product) => (
+            {products.map((product) => (
               <li key={product._id} className="product-item">
                 <span>{product.name} - ${product.price}</span>
                 {isAuthenticated && (
@@ -88,9 +82,9 @@ const Products = () => {
           </ul>
         )}
         <div className="pagination">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1}>Previous</button>
-          <span> Page {currentPage} of {totalPages} </span>
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= totalPages}>Next</button>
+          <button onClick={() => setPage(page - 1)} disabled={page <= 1}>Previous</button>
+          <span> Page {page} of {totalPages} </span>
+          <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>Next</button>
         </div>
       </div>
     </div>
