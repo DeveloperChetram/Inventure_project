@@ -13,6 +13,7 @@ const Products = () => {
   const [formData, setFormData] = useState({ name: '', description: '', price: '' });
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  
 
   useEffect(() => {
     fetchProducts({ page, search }, dispatch);
