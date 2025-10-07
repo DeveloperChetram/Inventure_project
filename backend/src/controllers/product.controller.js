@@ -9,11 +9,23 @@ export const createProduct = async (req, res) => {
 
 // Get Products with Pagination (no search)
 export const getProducts = async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const products = await Product.find().limit(limit).skip((page - 1) * limit);
-    const count = await Product.countDocuments();
-    res.json({ products, totalPages: Math.ceil(count / limit), currentPage: page });
+    const { page = 1, limit = 10, search = '' } = req.query;
+
+    // Create a query object. If search exists, use regex for a case-insensitive search.
+    const query = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const products = await Product.find(query)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .exec();
+
+    const count = await Product.countDocuments(query);
+
+    res.json({
+        products,
+        totalPages: Math.ceil(count / limit),
+        currentPage: parseInt(page),
+    });
 };
 
 // Get a single product
