@@ -1,17 +1,19 @@
-// import mongoose from "mongoose";
 import express from "express";
-import { indexRouter } from "../src/routes/index.routes.js";
-import { authRouter } from "../src/routes/auth.routes.js";
+import cors from "cors";
 import dotenv from "dotenv";
+import { indexRouter } from "./routes/index.routes.js";
+import { authRouter } from "./routes/auth.routes.js";
+import { productRouter } from "./routes/product.routes.js";
+
 dotenv.config();
 
-
 export const app = express();
-//middlewares
+
+// Middlewares
+app.use(cors());
 app.use(express.json());
 
-//Index Apis
-app.use("/",indexRouter);
-
-//auth Apis
-app.use("/api/auth",authRouter);
+// API Routes
+app.use("/", indexRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/products", productRouter);
